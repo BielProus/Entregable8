@@ -15,7 +15,10 @@ Route::get('/auth/github/redirect', function () {
     return Socialite::driver('github')->redirect();
 });
 
-$user = User::find(6); // Encuentra el usuario por su ID
+Route::get('/test-user', function () {
+    $user = User::find(6);
+    return $user;
+}); // Encuentra el usuario por su ID
 if ($user) {
     $user->delete(); // Elimina el usuario
 }
