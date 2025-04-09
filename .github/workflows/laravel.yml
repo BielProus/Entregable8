@@ -8,7 +8,6 @@ on:
 
 jobs:
   laravel-tests:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +31,9 @@ jobs:
         mkdir -p database
         touch database/database.sqlite
 
+    - name: Run migrations
+      run: php artisan migrate --force
+
     - name: Generate key
       run: php artisan key:generate
 
@@ -40,3 +42,4 @@ jobs:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: php artisan test
+
