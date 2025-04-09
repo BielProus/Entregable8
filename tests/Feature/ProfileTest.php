@@ -2,8 +2,15 @@
 
 use App\Models\User;
 
+function createTestUser() {
+    return User::factory()->create([
+        'password' => bcrypt('password'),
+        'email_verified_at' => now(),  // Make sure email is verified
+    ]);
+}
+
 test('profile page is displayed', function () {
-    $user = User::factory()->create();
+    $user = createTestUser();
 
     $response = $this
         ->actingAs($user)
@@ -13,7 +20,7 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $user = createTestUser();
 
     $response = $this
         ->actingAs($user)
@@ -30,56 +37,57 @@ test('profile information can be updated', function () {
 
     $this->assertSame('Test User', $user->name);
     $this->assertSame('test@example.com', $user->email);
-    $this->assertNull($user->email_verified_at);
+    $this->assertNull($user->email_verified_at); // Email should not be verified if unchanged
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
+    $user = createTestUser();
 
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
             'name' => 'Test User',
-            'email' => $user->email,
+            'email' => $user->email, // Keeping email the same
         ]);
 
     $response
         ->assertSessionHasNoErrors()
         ->assertRedirect('/profile');
 
+    // Verify email verification status remains the same
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
 test('user can delete their account', function () {
-    $user = User::factory()->create();
+    $user = createTestUser();
 
     $response = $this
         ->actingAs($user)
         ->delete('/profile', [
-            'password' => 'password',
+            'password' => 'password', // Make sure the password matches
         ]);
 
     $response
         ->assertSessionHasNoErrors()
         ->assertRedirect('/');
 
-    $this->assertGuest();
-    $this->assertNull($user->fresh());
+    $this->assertGuest(); // Ensure user is logged out after deletion
+    $this->assertNull($user->fresh()); // Ensure user is deleted
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
+    $user = createTestUser();
 
     $response = $this
         ->actingAs($user)
         ->from('/profile')
         ->delete('/profile', [
-            'password' => 'wrong-password',
+            'password' => 'wrong-password', // Testing with wrong password
         ]);
 
     $response
         ->assertSessionHasErrorsIn('userDeletion', 'password')
         ->assertRedirect('/profile');
 
-    $this->assertNotNull($user->fresh());
+    $this->assertNotNull($user->fresh()); // Ensure user is not deleted
 });
