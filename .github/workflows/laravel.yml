@@ -20,8 +20,19 @@ jobs:
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-    - name: Install Dependencies
+    - name: Install PHP Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Install Node.js and Dependencies
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'  # Make sure this is the version you want for Node.js
+
+    - name: Install NPM Dependencies
+      run: npm install  # or yarn install if you're using yarn
+
+    - name: Build Vite Assets
+      run: npm run build  # or yarn build if you're using yarn
 
     - name: Set Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
@@ -42,4 +53,3 @@ jobs:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: php artisan test
-
