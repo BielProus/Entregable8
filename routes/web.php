@@ -1,11 +1,7 @@
-<?php
-
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
-
-
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,13 +12,13 @@ Route::get('/auth/github/redirect', function () {
 });
 
 Route::get('/test-user', function () {
-    $user = User::find(6);
-    return $user;
-}); // Encuentra el usuario por su ID
-if ($user) {
-    $user->delete(); // Elimina el usuario
-}
-
+    $user = User::find(6); // Encuentra el usuario por su ID
+    if ($user) {
+        $user->delete(); // Elimina el usuario
+        return 'User deleted';
+    }
+    return 'User not found';
+});
 
 Route::get('/github-auth/callback', function () {
     $user_github = Socialite::driver('github')->stateless()->user();
@@ -38,7 +34,6 @@ Route::get('/github-auth/callback', function () {
 
     return redirect('/dashboard');
 });
-
 
 Route::get('/google-auth/redirect', function () {
     return Socialite::driver('google')->redirect();
